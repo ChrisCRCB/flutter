@@ -4,9 +4,14 @@
 // found in the LICENSE file.
 
 import com.android.build.OutputFile
+import com.android.build.api.variant.ApplicationVariant
+import com.android.build.api.variant.VariantOutput
+import com.android.build.gradle.tasks.PackageAndroidArtifact
 import com.flutter.gradle.BaseApplicationNameHandler
 import groovy.json.JsonGenerator
 import groovy.xml.QName
+import org.gradle.api.file.Directory
+
 import java.nio.file.Paths
 import org.apache.tools.ant.taskdefs.condition.Os
 import org.gradle.api.DefaultTask
@@ -1391,7 +1396,7 @@ class FlutterPlugin implements Plugin<Project> {
             return copyFlutterAssetsTask
         } // end def addFlutterDeps
         if (isFlutterAppProject()) {
-            project.android.applicationVariants.all { variant ->
+            project.android.applicationVariants.all { ApplicationVariant variant ->
                 Task assembleTask = variant.assembleProvider.get()
                 if (!shouldConfigureFlutterTask(assembleTask)) {
                     return
@@ -1410,10 +1415,11 @@ class FlutterPlugin implements Plugin<Project> {
                 //   * `abi` can be `armeabi-v7a|arm64-v8a|x86|x86_64` only if the flag `split-per-abi` is set.
                 //   * `flavor-name` is the flavor used to build the app in lower case if the assemble task is called.
                 //   * `build-mode` can be `release|debug|profile`.
-                variant.outputs.all { output ->
+                variant.outputs.each { VariantOutput output ->
                     assembleTask.doLast {
-                        def outputDirectory = variant.packageApplicationProvider.get().outputDirectory
-                        String outputDirectoryStr = outputDirectory.get()
+                        PackageAndroidArtifact packageApplicationProvider = variant.packageApplicationProvider.get()
+                        Directory outputDirectory = packageApplicationProvider.outputDirectory.get()
+                        String outputDirectoryStr = outputDirectory.toString()
                         String filename = "app"
                         String abi = output.getFilter(OutputFile.ABI)
                         if (abi != null && !abi.isEmpty()) {
