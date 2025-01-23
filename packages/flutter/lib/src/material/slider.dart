@@ -992,6 +992,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
       container: true,
       slider: true,
       onDidGainAccessibilityFocus: handleDidGainAccessibilityFocus,
+      label: widget.label,
       child: FocusableActionDetector(
         actions: _actionMap,
         shortcuts: shortcutMap,
